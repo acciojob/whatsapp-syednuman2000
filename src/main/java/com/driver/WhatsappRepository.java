@@ -105,4 +105,40 @@ public class WhatsappRepository {
         adminMap.put(group, user);
         return "SUCCESS";
     }
+
+    public int removeUser(User user) throws Exception{
+        Group g1 = new Group();
+        User u1 = new User();
+        boolean flag = false;
+        for(Group group : groupUserMap.keySet()){
+            for(User u : groupUserMap.get(group)){
+                if(u.getMobile().equals(user.getMobile())){
+                    u1 = u;
+                    g1 = group;
+                    flag = true;
+                    break;
+                }
+            }
+        }
+        if(!flag){
+            throw new Exception("User not found");
+        }
+        if(adminMap.get(g1)==user){
+            throw new Exception("Cannot remove admin");
+        }
+        userMobile.remove(u1.getMobile());
+        List<User> list = groupUserMap.get(g1);
+        list.remove(u1);
+        groupUserMap.put(g1,list);
+
+        List<Message> listOfMessage = groupMessageMap.get(g1);
+        for(Message message : listOfMessage){
+            if(senderMap.get(message)==u1){
+                senderMap.remove(message);
+            }
+            listOfMessage.remove(message);
+        }
+
+        return groupUserMap.get(g1).size() + groupMessageMap.get(g1).size() + senderMap.size();
+    }
 }
